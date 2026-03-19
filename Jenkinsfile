@@ -4,9 +4,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
+        DOCKER_HUB_CREDENTIALS = credentials('fc315f09-b7c1-4e5f-bd8b-b138def434aa')
         DOCKER_IMAGE_NAME = 'arynxd/uws-running-app'
-        DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
+        DOCKER_IMAGE_TAG = "${env.GIT_COMMIT.take(7)}-${env.BUILD_NUMBER}"
         GIT_REPO = 'https://github.com/nullishamy/uws-running-app.git'
         GIT_BRANCH = 'main'
     }
@@ -15,26 +15,21 @@ pipeline {
         githubPush()
     }
 
-    options {
-        gitHubBranchProperty(
-            branch: GIT_BRANCH,
-            triggerOnPush: true,
-            triggerAlsoOnMerge: false
-        )
-    }
-
     stages {
-        stage('Checkout') {
+        stage('Verify Trigger') {
             steps {
                 script {
-                    echo "Checking out source code from ${GIT_REPO}"
-                    git(
-                        url: GIT_REPO,
-                        branch: GIT_BRANCH,
-                        changelog: true,
-                        poll: false
-                    )
+                    echo "Build triggered by: ${env.GIT_COMMIT}"
+                    echo "Commit message: ${env.GIT_COMMIT_MESSAGE}"
+                    echo "Branch: ${env.GIT_BRANCH}"
+                    echo "Build number: ${env.BUILD_NUMBER}"
                 }
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                checkout scm
             }
         }
 
@@ -52,7 +47,7 @@ pipeline {
                 script {
                     echo "Logging in to DockerHub"
                     withCredentials([usernamePassword(
-                        credentialsId: 'docker-hub-credentials',
+                        credentialsId: 'fc315f09-b7c1-4e5f-bd8b-b138def434aa',
                         usernameVariable: 'DOCKER_USERNAME',
                         passwordVariable: 'DOCKER_PASSWORD'
                     )]) {
@@ -85,7 +80,7 @@ pipeline {
             }
         }
         success {
-            echo 'Docker image successfully built and pushed to DockerHub'
+            echo 'Docker image successfully built and pushed to DockerHub!'
         }
         failure {
             echo 'Build or push failed. Check console output for details.'
