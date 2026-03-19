@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RunCalc Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --border: #222222;
+    --accent: #e8ff3e;
+    --accent2: #ff5c3e;
+    --text: #f0f0f0;
+    --muted: #666;
+    --card: #161616;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: rgba(10,10,10,0.9);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .logo span { color: var(--text); }
+  .tagline { font-size: 0.75rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+
+  /* HERO */
+  .hero {
+    padding: 4rem 2.5rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 8vw, 6rem);
+    line-height: 0.95;
+    letter-spacing: 2px;
+  }
+  .hero h1 .highlight { color: var(--accent); }
+  .hero p { margin-top: 1rem; color: var(--muted); font-size: 1rem; max-width: 400px; line-height: 1.6; }
+
+  /* TABS */
+  .tabs-wrapper { max-width: 1100px; margin: 2rem auto 0; padding: 0 2.5rem; }
+  .tabs {
+    display: flex; gap: 0; overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: none; border: none; color: var(--muted);
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 0.9rem 1.4rem;
+    cursor: pointer; white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* PANELS */
+  .panels { max-width: 1100px; margin: 0 auto; padding: 2.5rem; }
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeUp 0.3s ease; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .card h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    margin-bottom: 0.4rem;
+    color: var(--text);
+  }
+  .card .desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.8rem; line-height: 1.5; }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group label { font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+  .form-group input, .form-group select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    padding: 0.65rem 0.9rem;
+    width: 100%;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .form-group input:focus, .form-group select:focus {
+    outline: none; border-color: var(--accent);
+  }
+  .form-group select option { background: #1a1a1a; }
+
+  .btn {
+    margin-top: 1.5rem;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 0.8rem 2rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: #d4eb00; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+
+  /* RESULTS */
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .result-item { display: flex; flex-direction: column; gap: 0.3rem; }
+  .result-label { font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+  .result-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .result-value.large { font-size: 2.2rem; }
+
+  /* SPLITS TABLE */
+  .splits-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.9rem; }
+  .splits-table thead th {
+    text-align: left; padding: 0.6rem 0.8rem;
+    font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--muted); border-bottom: 1px solid var(--border);
+  }
+  .splits-table tbody tr { border-bottom: 1px solid #1a1a1a; transition: background 0.15s; }
+  .splits-table tbody tr:hover { background: rgba(232,255,62,0.04); }
+  .splits-table tbody td {
+    padding: 0.65rem 0.8rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+  }
+  .splits-table tbody td:first-child { color: var(--muted); }
+
+  /* ZONES */
+  .zone-row {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 8px; margin-bottom: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .zone-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    width: 28px;
+    flex-shrink: 0;
+  }
+  .zone-bar-wrap { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .zone-bar { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+  .zone-info { display: flex; flex-direction: column; gap: 0.1rem; min-width: 120px; }
+  .zone-name { font-weight: 600; font-size: 0.9rem; }
+  .zone-range { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--muted); }
+
+  /* VO2 GAUGE */
+  .vo2-display {
+    display: flex; align-items: center; gap: 2rem;
+    margin-top: 1.5rem; padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .vo2-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .vo2-sub { font-size: 0.75rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .vo2-cat { font-size: 1.5rem; font-weight: 600; margin-top: 0.3rem; }
+  .vo2-emoji { font-size: 2rem; }
+
+  /* ERROR */
+  .error-msg {
+    color: var(--accent2); font-size: 0.85rem;
+    padding: 0.8rem; background: rgba(255,92,62,0.08);
+    border: 1px solid rgba(255,92,62,0.2);
+    border-radius: 8px; margin-top: 1rem;
+  }
+
+  /* RACE PRESET BUTTONS */
+  .preset-btns { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+  .preset-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); border-radius: 6px; padding: 0.4rem 0.9rem;
+    font-size: 0.8rem; cursor: pointer; transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .hero { padding: 2.5rem 1.5rem 1.5rem; }
+    .panels { padding: 1.5rem; }
+    .tabs-wrapper { padding: 0 1.5rem; }
+    header { padding: 1.2rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">Run<span>Calc</span> Pro</a>
+  <span class="tagline">Running Analytics</span>
+</header>
+
+<div class="hero">
+  <h1>TRAIN<br>SMARTER.<br><span class="highlight">RUN FASTER.</span></h1>
+  <p>Advanced running calculators for pace, race predictions, training zones, splits, and VO₂ max estimation.</p>
+</div>
+
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('pace')">Pace Calc</button>
+    <button class="tab-btn" onclick="switchTab('predict')">Race Predictor</button>
+    <button class="tab-btn" onclick="switchTab('zones')">HR Zones</button>
+    <button class="tab-btn" onclick="switchTab('splits')">Splits</button>
+    <button class="tab-btn" onclick="switchTab('vo2')">VO₂ Max</button>
+  </div>
+</div>
+
+<div class="panels">
+
+  <!-- PACE CALCULATOR -->
+  <div class="panel active" id="panel-pace">
+    <div class="card">
+      <h2>Pace Calculator</h2>
+      <p class="desc">Enter your distance and finish time to calculate your average pace and speed.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Distance (km)</label>
+          <input type="number" id="pace-dist" placeholder="10.0" step="0.1" min="0.1">
+        </div>
+        <div class="form-group">
+          <label>Hours</label>
+          <input type="number" id="pace-h" placeholder="0" min="0" max="99">
+        </div>
+        <div class="form-group">
+          <label>Minutes</label>
+          <input type="number" id="pace-m" placeholder="50" min="0" max="59">
+        </div>
+        <div class="form-group">
+          <label>Seconds</label>
+          <input type="number" id="pace-s" placeholder="0" min="0" max="59">
+        </div>
+      </div>
+      <button class="btn" onclick="calcPace()">Calculate Pace</button>
+      <div id="pace-result"></div>
+    </div>
+  </div>
+
+  <!-- RACE PREDICTOR -->
+  <div class="panel" id="panel-predict">
+    <div class="card">
+      <h2>Race Time Predictor</h2>
+      <p class="desc">Using the Riegel formula, predict your finish time for any distance based on a known result.</p>
+      <div class="preset-btns">
+        <button class="preset-btn" onclick="setTarget(5)">5K</button>
+        <button class="preset-btn" onclick="setTarget(10)">10K</button>
+        <button class="preset-btn" onclick="setTarget(21.0975)">Half Marathon</button>
+        <button class="preset-btn" onclick="setTarget(42.195)">Marathon</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Known Distance (km)</label>
+          <input type="number" id="pred-known-dist" placeholder="5.0" step="0.1">
+        </div>
+        <div class="form-group" style="grid-column: span 2">
+          <label>Known Time (total minutes)</label>
+          <input type="number" id="pred-known-time" placeholder="25.0" step="0.1">
+        </div>
+        <div class="form-group">
+          <label>Target Distance (km)</label>
+          <input type="number" id="pred-target-dist" placeholder="42.195" step="0.001">
+        </div>
+      </div>
+      <button class="btn" onclick="predictRace()">Predict Time</button>
+      <div id="predict-result"></div>
+    </div>
+  </div>
+
+  <!-- TRAINING ZONES -->
+  <div class="panel" id="panel-zones">
+    <div class="card">
+      <h2>Heart Rate Training Zones</h2>
+      <p class="desc">Enter your maximum heart rate to see your 5-zone training breakdown.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Max Heart Rate (bpm)</label>
+          <input type="number" id="zones-mhr" placeholder="185" min="100" max="250">
+        </div>
+        <div class="form-group" style="align-self: end">
+          <label style="opacity:0">.</label>
+          <button class="btn" style="margin-top:0; width:100%" onclick="calcZones()">Calculate</button>
+        </div>
+      </div>
+      <div id="zones-result"></div>
+    </div>
+  </div>
+
+  <!-- SPLITS -->
+  <div class="panel" id="panel-splits">
+    <div class="card">
+      <h2>Split Calculator</h2>
+      <p class="desc">Plan your race splits by distance, target pace, and pacing strategy.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Distance (km)</label>
+          <input type="number" id="splits-dist" placeholder="10.0" step="0.1">
+        </div>
+        <div class="form-group">
+          <label>Target Pace (min/km)</label>
+          <input type="number" id="splits-pace-min" placeholder="5" min="1" max="30">
+        </div>
+        <div class="form-group">
+          <label>Pace (sec part)</label>
+          <input type="number" id="splits-pace-sec" placeholder="30" min="0" max="59">
+        </div>
+        <div class="form-group">
+          <label>Strategy</label>
+          <select id="splits-strategy">
+            <option value="even">Even</option>
+            <option value="negative">Negative Split</option>
+            <option value="positive">Positive Split</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" onclick="calcSplits()">Generate Splits</button>
+      <div id="splits-result"></div>
+    </div>
+  </div>
+
+  <!-- VO2MAX -->
+  <div class="panel" id="panel-vo2">
+    <div class="card">
+      <h2>VO₂ Max Estimator</h2>
+      <p class="desc">Estimate your aerobic capacity using the Jack Daniels formula from any race or time trial result.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Distance (km)</label>
+          <input type="number" id="vo2-dist" placeholder="5.0" step="0.1">
+        </div>
+        <div class="form-group">
+          <label>Finish Time (minutes)</label>
+          <input type="number" id="vo2-time" placeholder="25.0" step="0.1">
+        </div>
+      </div>
+      <button class="btn" onclick="calcVO2()">Estimate VO₂ Max</button>
+      <div id="vo2-result"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+function showError(id, msg) {
+  document.getElementById(id).innerHTML = `<div class="error-msg">⚠ ${msg}</div>`;
+}
+
+async function calcPace() {
+  const dist = parseFloat(document.getElementById('pace-dist').value);
+  const h = parseInt(document.getElementById('pace-h').value) || 0;
+  const m = parseInt(document.getElementById('pace-m').value) || 0;
+  const s = parseInt(document.getElementById('pace-s').value) || 0;
+  if (!dist) { showError('pace-result', 'Please enter a distance.'); return; }
+  const res = await fetch('/api/pace', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ distance_km: dist, time_hours: h, time_minutes: m, time_seconds: s })
+  });
+  const d = await res.json();
+  if (d.error) { showError('pace-result', d.error); return; }
+  document.getElementById('pace-result').innerHTML = `
+    <div class="result-grid">
+      <div class="result-item"><span class="result-label">Pace /km</span><span class="result-value large">${d.pace_per_km}</span></div>
+      <div class="result-item"><span class="result-label">Pace /mile</span><span class="result-value">${d.pace_per_mile}</span></div>
+      <div class="result-item"><span class="result-label">Speed km/h</span><span class="result-value">${d.speed_kmh}</span></div>
+      <div class="result-item"><span class="result-label">Speed mph</span><span class="result-value">${d.speed_mph}</span></div>
+    </div>`;
+}
+
+function setTarget(dist) {
+  document.getElementById('pred-target-dist').value = dist;
+}
+
+async function predictRace() {
+  const kd = parseFloat(document.getElementById('pred-known-dist').value);
+  const kt = parseFloat(document.getElementById('pred-known-time').value);
+  const td = parseFloat(document.getElementById('pred-target-dist').value);
+  if (!kd || !kt || !td) { showError('predict-result', 'Please fill in all fields.'); return; }
+  const res = await fetch('/api/predict-race', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ known_distance_km: kd, known_time_minutes: kt, target_distance_km: td })
+  });
+  const d = await res.json();
+  if (d.error) { showError('predict-result', d.error); return; }
+  document.getElementById('predict-result').innerHTML = `
+    <div class="result-grid">
+      <div class="result-item"><span class="result-label">Predicted Time</span><span class="result-value large">${d.predicted_time}</span></div>
+      <div class="result-item"><span class="result-label">Avg Pace /km</span><span class="result-value">${d.pace_per_km}</span></div>
+      <div class="result-item"><span class="result-label">Avg Pace /mile</span><span class="result-value">${d.pace_per_mile}</span></div>
+    </div>`;
+}
+
+async function calcZones() {
+  const mhr = parseInt(document.getElementById('zones-mhr').value);
+  if (!mhr) { showError('zones-result', 'Please enter your max heart rate.'); return; }
+  const res = await fetch('/api/training-zones', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ max_hr: mhr })
+  });
+  const d = await res.json();
+  if (d.error) { showError('zones-result', d.error); return; }
+  const rows = d.zones.map(z => `
+    <div class="zone-row">
+      <span class="zone-num" style="color:${z.color}">Z${z.zone}</span>
+      <div class="zone-info">
+        <span class="zone-name">${z.name}</span>
+        <span class="zone-range">${z.min_hr}–${z.max_hr} bpm</span>
+      </div>
+      <div class="zone-bar-wrap">
+        <div class="zone-bar" style="background:${z.color}; width:${z.max_pct}%"></div>
+      </div>
+      <span style="font-family:'JetBrains Mono',monospace; font-size:0.8rem; color:${z.color}; width:60px; text-align:right">${z.min_pct}–${z.max_pct}%</span>
+    </div>`).join('');
+  document.getElementById('zones-result').innerHTML = `<div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid var(--border)">${rows}</div>`;
+}
+
+async function calcSplits() {
+  const dist = parseFloat(document.getElementById('splits-dist').value);
+  const pm = parseInt(document.getElementById('splits-pace-min').value) || 0;
+  const ps = parseInt(document.getElementById('splits-pace-sec').value) || 0;
+  const strategy = document.getElementById('splits-strategy').value;
+  if (!dist || (pm === 0 && ps === 0)) { showError('splits-result', 'Please fill in all fields.'); return; }
+  const paceSeconds = (pm * 60) + ps;
+  const res = await fetch('/api/splits', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ distance_km: dist, target_pace_per_km_seconds: paceSeconds, strategy })
+  });
+  const d = await res.json();
+  if (d.error) { showError('splits-result', d.error); return; }
+  const rows = d.splits.map(s => `
+    <tr>
+      <td>${s.km} km</td>
+      <td>${s.split_pace}/km</td>
+      <td>${s.split_time}</td>
+      <td style="color:var(--accent)">${s.cumulative}</td>
+    </tr>`).join('');
+  document.getElementById('splits-result').innerHTML = `
+    <table class="splits-table">
+      <thead><tr><th>Split</th><th>Pace</th><th>Time</th><th>Cumulative</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="result-grid" style="margin-top:1rem">
+      <div class="result-item"><span class="result-label">Total Time</span><span class="result-value">${d.total_time}</span></div>
+    </div>`;
+}
+
+async function calcVO2() {
+  const dist = parseFloat(document.getElementById('vo2-dist').value);
+  const time = parseFloat(document.getElementById('vo2-time').value);
+  if (!dist || !time) { showError('vo2-result', 'Please fill in all fields.'); return; }
+  const res = await fetch('/api/vo2max', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ distance_km: dist, time_minutes: time })
+  });
+  const d = await res.json();
+  if (d.error) { showError('vo2-result', d.error); return; }
+  document.getElementById('vo2-result').innerHTML = `
+    <div class="vo2-display">
+      <div><div class="vo2-number">${d.vo2max}</div><div class="vo2-sub">ml/kg/min</div></div>
+      <div><div class="vo2-emoji">${d.emoji}</div><div class="vo2-cat">${d.category}</div></div>
+    </div>`;
+}
+</script>
+</body>
+</html>
